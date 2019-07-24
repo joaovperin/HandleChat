@@ -4,7 +4,6 @@ buildscript {
     repositories {
         jcenter()
         google()
-        mavenLocal()
         //maven { url 'https://dl.bintray.com/android/android-tools' }
     }
     dependencies {
@@ -20,7 +19,6 @@ allprojects {
     repositories {
         jcenter()
         google()
-        mavenLocal()
     }
 }
 

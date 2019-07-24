@@ -51,7 +51,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
@@ -73,8 +72,8 @@ public class MainActivity extends Activity {
 
     private static final String TAG = "MainActivity";
 
-    public static final String KEY_MESSAGE_LENGTH = "message_length";
-    public static final String KEY_DEFAULT_CHAT_ROOM = "default_chatroom";
+    public static final String KEY_MESSAGE_LENGTH = "max_message_length";
+    public static final String KEY_DEFAULT_CHAT_ROOM = "default_chat_room";
     public static final String KEY_NUMBER_MESSAGES = "number_messages";
 
     private static final String ANONYMOUS = "anonymous";
@@ -84,7 +83,7 @@ public class MainActivity extends Activity {
     private static final int RC_SIGN_IN = 100001;
     private static final int RC_PHOTO_PICKER = 10002;
 
-    private MessageAdapter mMessageAdapter;
+    private ChatMessageAdapter mMessageAdapter;
     private EditText mMessageEditText;
     private Button mSendButton;
 
@@ -123,7 +122,7 @@ public class MainActivity extends Activity {
 
         // Initialize message ListView and its adapter
         List<ChatMessage> ChatMessages = new ArrayList<>();
-        mMessageAdapter = new MessageAdapter(this, R.layout.item_message, ChatMessages);
+        mMessageAdapter = new ChatMessageAdapter(this, R.layout.item_message, ChatMessages);
         mMessageListView.setAdapter(mMessageAdapter);
 
         // Initialize progress bar
@@ -170,9 +169,9 @@ public class MainActivity extends Activity {
                 // Sets max messages length
                 Long messagesMaxLength = mFirebaseRemoteConfig.getLong(KEY_MESSAGE_LENGTH);
                 mMessageEditText
-                        .setFilters(new InputFilter[] { new InputFilter.LengthFilter(messagesMaxLength.intValue()) });
+                        .setFilters(new InputFilter[]{new InputFilter.LengthFilter(messagesMaxLength.intValue())});
                 // Default chat room
-                mChatRoom = mFirebaseRemoteConfig.getString(DEFAULT_CHAT_ROOM_KEY);
+                mChatRoom = mFirebaseRemoteConfig.getString(KEY_DEFAULT_CHAT_ROOM);
             }
         });
 
@@ -208,8 +207,10 @@ public class MainActivity extends Activity {
 
     private Intent createIntentForSigning() {
         return AuthUI.getInstance().createSignInIntentBuilder().setIsSmartLockEnabled(false, true)
-                .setAvailableProviders(Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(),
-                        new AuthUI.IdpConfig.EmailBuilder().build()))
+                .setAvailableProviders(Arrays.asList(
+                        new AuthUI.IdpConfig.EmailBuilder().build(),
+                        new AuthUI.IdpConfig.GoogleBuilder().build()
+                ))
                 .build();
     }
 
@@ -231,7 +232,7 @@ public class MainActivity extends Activity {
                     ChatMessage ChatMessage = new ChatMessage(null, mUsername, task.getResult().toString());
                     mMessagesDatabaseReference.push().setValue(ChatMessage);
                 } else {
-                    Toast.makeText(MainActivity.this, "upload failed: " + task.getException().getMessage(),
+                    Toast.makeText(MainActivity.this, getString(R.string.upload_fail) + task.getException().getMessage(),
                             Toast.LENGTH_SHORT).show();
                 }
             }
@@ -278,7 +279,7 @@ public class MainActivity extends Activity {
 
     private void loadInitialMessages() {
         // Load some data on activity create
-        Long numberMessages = mFirebaseRemoteConfig.getLong(NUMBER_MESSAGES_KEY);
+        Long numberMessages = mFirebaseRemoteConfig.getLong(KEY_NUMBER_MESSAGES);
         mMessagesDatabaseReference.orderByKey().limitToLast(numberMessages.intValue());
     }
 
@@ -325,17 +326,17 @@ public class MainActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.sign_out_menu:
-            AuthUI.getInstance().signOut(MainActivity.this).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    startActivityForResult(createIntentForSigning(), RC_SIGN_IN);
-                    finish();
-                }
-            });
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
+            case R.id.sign_out_menu:
+                AuthUI.getInstance().signOut(MainActivity.this).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        startActivityForResult(createIntentForSigning(), RC_SIGN_IN);
+                        finish();
+                    }
+                });
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -374,22 +375,22 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-        case RC_SIGN_IN:
-            if (resultCode == RESULT_OK) {
-                Toast.makeText(MainActivity.this, "Welcome to HandleChat!", Toast.LENGTH_LONG).show();
-            } else if (resultCode == RESULT_CANCELED) {
-                Toast.makeText(MainActivity.this, "Sign-in canceled", Toast.LENGTH_LONG).show();
-                finish();
-            }
-            break;
-        case RC_PHOTO_PICKER:
-            if (resultCode == RESULT_OK) {
-                Uri selectedImageUri = data.getData();
-                uploadPicture(selectedImageUri);
-            } else if (resultCode == RESULT_CANCELED) {
-                Toast.makeText(MainActivity.this, getString(R.string.fail_load_image), Toast.LENGTH_SHORT).show();
-            }
-            break;
+            case RC_SIGN_IN:
+                if (resultCode == RESULT_OK) {
+                    Toast.makeText(MainActivity.this, getString(R.string.welcome_to_app), Toast.LENGTH_LONG).show();
+                } else if (resultCode == RESULT_CANCELED) {
+                    Toast.makeText(MainActivity.this, getString(R.string.sign_in_canceled), Toast.LENGTH_LONG).show();
+                    finish();
+                }
+                break;
+            case RC_PHOTO_PICKER:
+                if (resultCode == RESULT_OK) {
+                    Uri selectedImageUri = data.getData();
+                    uploadPicture(selectedImageUri);
+                } else if (resultCode != RESULT_CANCELED) {
+                    Toast.makeText(MainActivity.this, getString(R.string.fail_load_image), Toast.LENGTH_SHORT).show();
+                }
+                break;
         }
 
     }

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HandleChat</string>
+    <string name="sign_out">Sair</string>
+    <string name="send_button_label">Enviar</string>
+    <string name="fail_load_image">Falha ao carregar imagem!</string>
+    <string name="upload_fail">Falha ao enviar arquivo!</string>
+    <string name="welcome_to_app">Bem vindo ao HandleChat!</string>
+    <string name="sign_in_canceled">Registro canceledo!</string>
+</resources>
