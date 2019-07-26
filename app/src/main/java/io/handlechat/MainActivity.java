@@ -188,6 +188,9 @@ public class MainActivity extends Activity {
                 }
             }
         };
+
+        // Enable offline storage
+        mFirebaseDatabase.setPersistenceEnabled(true);
     }
 
     private void fetchSettings(final OnCompleteListener<Void> listener) {
@@ -256,13 +259,18 @@ public class MainActivity extends Activity {
         mUsername = firebaseUser.getDisplayName();
 
         // Instantiate the users database
-        DatabaseReference mUsersDatabaseReference = mFirebaseDatabase.getReference().child("users");
+        final DatabaseReference mUsersDatabaseReference = mFirebaseDatabase.getReference().child("users");
 
         mUsersDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.hasChild(firebaseUser.getUid())) {
-                    mChatRoom = dataSnapshot.child(firebaseUser.getUid()).child("chatroom").getValue(String.class);
+                String firebaseUserUid = firebaseUser.getUid();
+                if (dataSnapshot.hasChild(firebaseUserUid)) {
+                    mChatRoom = dataSnapshot.child(firebaseUserUid).child("chatroom").getValue(String.class);
+                } else { // new user, insert on the database
+                    DatabaseReference currentUserReference = mUsersDatabaseReference.child(firebaseUserUid);
+                    currentUserReference.child("name").setValue(firebaseUser.getDisplayName());
+                    currentUserReference.child("chatroom").setValue(mFirebaseRemoteConfig.getString(KEY_DEFAULT_CHAT_ROOM));
                 }
                 attachDatabaseReadListener();
                 loadInitialMessages();
