@@ -121,8 +121,8 @@ public class MainActivity extends Activity {
         mSendButton = findViewById(R.id.sendButton);
 
         // Initialize message ListView and its adapter
-        List<ChatMessage> ChatMessages = new ArrayList<>();
-        mMessageAdapter = new ChatMessageAdapter(this, R.layout.item_message, ChatMessages);
+        List<ChatMessage> chatMessages = new ArrayList<>();
+        mMessageAdapter = new ChatMessageAdapter(this, R.layout.item_message, chatMessages);
         mMessageListView.setAdapter(mMessageAdapter);
 
         // Initialize progress bar

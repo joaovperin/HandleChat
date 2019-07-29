@@ -26,6 +26,8 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -34,6 +36,8 @@ import java.util.List;
  * @author joaovperin
  */
 public class ChatMessageAdapter extends ArrayAdapter<ChatMessage> {
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 
     public ChatMessageAdapter(Context context, int resource, List<ChatMessage> objects) {
         super(context, resource, objects);
@@ -48,6 +52,7 @@ public class ChatMessageAdapter extends ArrayAdapter<ChatMessage> {
         ImageView photoImageView = (ImageView) convertView.findViewById(R.id.photoImageView);
         TextView messageTextView = (TextView) convertView.findViewById(R.id.messageTextView);
         TextView authorTextView = (TextView) convertView.findViewById(R.id.nameTextView);
+        TextView dateTextView = (TextView) convertView.findViewById(R.id.dateTextView);
 
         ChatMessage message = getItem(position);
 
@@ -62,7 +67,16 @@ public class ChatMessageAdapter extends ArrayAdapter<ChatMessage> {
             messageTextView.setText(message.getText());
         }
         authorTextView.setText(message.getName());
+        dateTextView.setText(fmtDate(message.getDate()));
 
         return convertView;
     }
+
+    private static String fmtDate(Date date) {
+        if (date != null) {
+            return String.format("(%s)", sdf.format(date));
+        }
+        return "";
+    }
+
 }

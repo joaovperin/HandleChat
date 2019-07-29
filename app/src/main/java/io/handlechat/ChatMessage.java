@@ -16,6 +16,8 @@
  */
 package io.handlechat;
 
+import java.util.Date;
+
 /**
  * A chat message
  */
@@ -24,13 +26,16 @@ public class ChatMessage {
     private String text;
     private String name;
     private String photoUrl;
+    private Date date;
 
-    public ChatMessage() { }
+    public ChatMessage() {
+    }
 
     public ChatMessage(String text, String name, String photoUrl) {
         this.text = text;
         this.name = name;
         this.photoUrl = photoUrl;
+        this.date = new Date();
     }
 
     public String getText() {
@@ -55,5 +60,13 @@ public class ChatMessage {
 
     public void setPhotoUrl(String photoUrl) {
         this.photoUrl = photoUrl;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 }
